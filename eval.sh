@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=1  PYTHONIOENCODING=utf-8 python eval.py ./cmrc2018/dev.json ./output_c_wwm/predictions.json
