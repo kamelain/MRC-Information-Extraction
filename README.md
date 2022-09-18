@@ -1,45 +1,51 @@
-# BERT_Chinese_MRC
+# MRC_BERT_Chinese_Information_Extraction
 
-基于[BERT](https://github.com/google-research/bert)官方源码做修改，适配中文QA任务[DRCD](https://github.com/DRCSolutionService/DRCD)。
+基於[BERT](https://github.com/google-research/bert)、[BERT-wwm](https://github.com/ymcui/Chinese-BERT-wwm) 以及 [MacBERT](https://github.com/ymcui/MacBERT) 的官方資源修改。
 
-Inspired by [BERT-for-Chinese-Question-Answering](https://github.com/eva-n27/BERT-for-Chinese-Question-Answering)
+適用於中文機器閱讀理解：繁體中文 [DRCD](https://github.com/DRCSolutionService/DRCD)、簡體中文 [CMRC](https://github.com/ymcui/cmrc2018)。
 
-### 改动
+Inspired by [BERT-for-Chinese-Question-Answering](https://github.com/eva-n27/BERT-for-Chinese-Question-Answering), [BERT with History Answer Embedding for Conversational Question Answering](https://github.com/prdwb/bert_hae)。
 
-- [x] 基于read_squad_example.py，修改中文的tokenization，去除无法匹配answer_start的数据
-- [ ] ToDo
+本程式碼為論文 [A Study on Contextualized Language Modeling for Machine Reading Comprehension](https://aclanthology.org/2021.rocling-1.7/) 以及 [A Study on the Information Extraction and Knowledge Injection for Machine Reading Comprehension](https://etds.lib.ntnu.edu.tw/thesis/detail/c7f11bb51318d02b9874ae5429b6eb82/?seq=1) 於單輪機器閱讀理解的實作部分。包括 Fine-tune 於 BERT/BERT-wwm/MacBERT 結果、加入 Information Extration 資訊結果，以及 N-best 答案進行 Reranking 的 Ensemble 方法與結果。
+
+![Clustering Strategies](https://github.com/kamelain/MRC-Information-Extraction/blob/main/Screen%20Shot%202022-09-18%20at%208.31.49%20PM.png)
+
 
 ### 使用
 
-* Train&Prediction
+* Information Extraction
 
 ```
-python run_drcd.py \
-  --vocab_file=$BERT_MODEL_DIR/vocab.txt \
-  --bert_config_file=$BERT_MODEL_DIR/bert_config.json \
-  --init_checkpoint=$BERT_MODEL_DIR/bert_model.ckpt \
-  --do_train=True \
-  --train_file=$DRCD_DIR/DRCD_training.json \
-  --do_predict=True \
-  --predict_file=$DRCD_DIR/DRCD_test.json \
-  --train_batch_size=6 \
-  --learning_rate=3e-5 \
-  --num_train_epochs=3.0 \
-  --do_lower_case=True \
-  --max_seq_length=512 \
-  --doc_stride=128 \
-  --output_dir=$OUTPUT_DIR/
+bash cls/run_cls.sh
+```
+
+* Train & Prediction
+
+```
+bash run.sh
 ```
 
 * Evaluate
 
 ```
-pyton eva.py $DRCD/DRCD_testing.json $OUTPUT_DIR/prediction.json
+bash eval.sh
 ```
 
-### 结果
+### Fine-tuning DRCD 結果輸出位置
 
-* EM: 85.65702834239909
-* F1: 91.78050628879733
+>* /output
+>* /output_wwm
+>* /output_mac
 
-![result](https://ws4.sinaimg.cn/large/006tNc79gy1g2zldnqvc6j30vg04wgmo.jpg)
+### Fine-tuning CMRC 結果輸出位置
+
+>* /output
+>* /output_c_wwm
+>* /output_c_mac
+
+### Information Extraction 程式碼位置
+
+>* /cls
+
+
+![result](https://github.com/kamelain/MRC-Information-Extraction/blob/main/Screen%20Shot%202022-09-18%20at%208.31.08%20PM.png)
