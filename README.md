@@ -11,6 +11,12 @@ Inspired by [BERT-for-Chinese-Question-Answering](https://github.com/eva-n27/BER
 ![Clustering Strategies](https://github.com/kamelain/MRC-Information-Extraction/blob/main/Screen%20Shot%202022-09-18%20at%208.31.49%20PM.png)
 
 
+### Conda 環境設定檔
+
+>*tf.yml 模型訓練環境
+>*prep.yml 資料預處理 (Clustering, Ensemble) 等環境
+
+
 ### 使用
 
 * Information Extraction
