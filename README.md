@@ -7,7 +7,7 @@ A Study on Contextualized Language Modeling for Machine Reading Comprehension
 
 本程式碼為論文 [A Study on Contextualized Language Modeling for Machine Reading Comprehension](https://aclanthology.org/2021.rocling-1.7/) 以及 [A Study on the Information Extraction and Knowledge Injection for Machine Reading Comprehension](https://etds.lib.ntnu.edu.tw/thesis/detail/c7f11bb51318d02b9874ae5429b6eb82/?seq=1) 於單輪機器閱讀理解的實作部分。包括 Fine-tune 於 BERT/BERT-wwm/MacBERT 結果、加入 Information Extration 資訊結果，以及 N-best 答案進行 Reranking 的 Ensemble 方法與結果。
 
-Clutering Strategies 如下。
+>Clutering Strategies
 ![Clustering Strategies](https://github.com/kamelain/MRC-Information-Extraction/blob/main/Screen%20Shot%202022-09-18%20at%208.31.49%20PM.png)
 
 
@@ -39,19 +39,20 @@ bash eval.sh
 
 ### Fine-tuning DRCD 結果輸出位置
 
->* /output
->* /output_wwm
->* /output_mac
+>* output
+>* output_wwm
+>* output_mac
 
 ### Fine-tuning CMRC 結果輸出位置
 
->* /output
->* /output_c_wwm
->* /output_c_mac
+>* output
+>* output_c_wwm
+>* output_c_mac
 
 ### Information Extraction 程式碼位置
 
->* /cls
+>* cls
 
 
+>Result
 ![result](https://github.com/kamelain/MRC-Information-Extraction/blob/main/Screen%20Shot%202022-09-18%20at%208.31.08%20PM.png)
