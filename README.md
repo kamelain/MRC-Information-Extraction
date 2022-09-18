@@ -1,5 +1,5 @@
 # MRC-Information-Extraction
-A Study on the Information Extraction and Knowledge Injection for Machine Reading Comprehension
+A Study on Contextualized Language Modeling for Machine Reading Comprehension 
 
 基於[BERT](https://github.com/google-research/bert)、[BERT-wwm](https://github.com/ymcui/Chinese-BERT-wwm) 以及 [MacBERT](https://github.com/ymcui/MacBERT) 的官方資源修改。
 
