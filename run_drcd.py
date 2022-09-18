@@ -32,47 +32,39 @@ import tensorflow as tf
 flags = tf.flags
 
 FLAGS = flags.FLAGS
-# flags.DEFINE_string(
-#     "bert_config_file", "/share/nas167/chinyingwu/nlp/dialog/corpus/chinese_macbert_base/bert_config.json",
-#     "The config json file corresponding to the pre-trained BERT model. "
-#     "This specifies the model architecture.")
-
-# flags.DEFINE_string("vocab_file", "/share/nas167/chinyingwu/nlp/dialog/corpus/chinese_macbert_base/vocab.txt",
-#                     "The vocabulary file that the BERT model was trained on.")
-
-# Required parameters
+# Pretrain models
 flags.DEFINE_string(
-    "bert_config_file", "/share/nas167/chinyingwu/nlp/dialog/corpus/uncased_L-12_H-768_A-12/bert_config.json",
+    "bert_config_file", "chinese_wwm_L-12_H-768_A-12/bert_config.json",
     "The config json file corresponding to the pre-trained BERT model. "
     "This specifies the model architecture.")
 
-flags.DEFINE_string("vocab_file", "/share/nas167/chinyingwu/nlp/dialog/corpus/uncased_L-12_H-768_A-12/vocab.txt",
+flags.DEFINE_string("vocab_file", "chinese_wwm_L-12_H-768_A-12/vocab.txt",
                     "The vocabulary file that the BERT model was trained on.")
 
 flags.DEFINE_string(
-    "output_dir", "/share/nas167/chinyingwu/lesson/BERT_Chinese_MRC_drcd-master/output",
-    "The output directory where the model checkpoints will be written.")
+    "init_checkpoint", "chinese_wwm_L-12_H-768_A-12/bert_model.ckpt",
+    "Initial checkpoint (usually from a pre-trained BERT model).")
 
-# Other parameters
-flags.DEFINE_string("train_file", "/share/nas167/chinyingwu/lesson/BERT_Chinese_MRC_drcd-master/DRCD/DRCD_training.json",
+# Dataset
+flags.DEFINE_string("train_file", "cls/dataset_cls/DRCD/DRCD_training.json",
                     "SQuAD json for training. E.g., train-v1.1.json")
 
 flags.DEFINE_string(
-    "predict_file", "/share/nas167/chinyingwu/lesson/BERT_Chinese_MRC_drcd-master/DRCD/DRCD_test.json",
+    "predict_file", "cls/dataset_cls/DRCD/DRCD_test.json",
     "SQuAD json for predictions. E.g., dev-v1.1.json or test-v1.1.json")
-# flags.DEFINE_string("train_file", "/share/nas167/chinyingwu/lesson/BERT_Chinese_MRC_drcd-master/cmrc2018/train.json",
+
+# flags.DEFINE_string("train_file", "cls/dataset_cls/cmrc2018/train.json",
 #                     "SQuAD json for training. E.g., train-v1.1.json")
 
 # flags.DEFINE_string(
-#     "predict_file", "/share/nas167/chinyingwu/lesson/BERT_Chinese_MRC_drcd-master/cmrc2018/dev.json",
+#     "predict_file", "cls/dataset_cls/cmrc2018/dev.json",
 #     "SQuAD json for predictions. E.g., dev-v1.1.json or test-v1.1.json")
 
-# flags.DEFINE_string(
-#     "init_checkpoint", "/share/nas167/chinyingwu/nlp/dialog/corpus/chinese_macbert_base/bert_model.ckpt",
-#     "Initial checkpoint (usually from a pre-trained BERT model).")
+# Other parameters
+
 flags.DEFINE_string(
-    "init_checkpoint", "/share/nas167/chinyingwu/nlp/dialog/corpus/uncased_L-12_H-768_A-12/bert_model.ckpt",
-    "Initial checkpoint (usually from a pre-trained BERT model).")
+    "output_dir", "cls/output_wwm",
+    "The output directory where the model checkpoints will be written.")
 
 flags.DEFINE_bool(
     "do_lower_case", True,
@@ -178,6 +170,7 @@ class SquadExample(object):
 
   def __init__(self,
                qas_id,
+               title_label,
                question_text,
                doc_tokens,
                orig_answer_text=None,
@@ -185,6 +178,7 @@ class SquadExample(object):
                end_position=None,
                is_impossible=False):
     self.qas_id = qas_id
+    self.title_label = title_label
     self.question_text = question_text
     self.doc_tokens = doc_tokens
     self.orig_answer_text = orig_answer_text
@@ -223,6 +217,7 @@ class InputFeatures(object):
                input_ids,
                input_mask,
                segment_ids,
+               title_ids,
                start_position=None,
                end_position=None,
                is_impossible=None):
@@ -235,6 +230,7 @@ class InputFeatures(object):
     self.input_ids = input_ids
     self.input_mask = input_mask
     self.segment_ids = segment_ids
+    self.title_ids = title_ids
     self.start_position = start_position
     self.end_position = end_position
     self.is_impossible = is_impossible
@@ -252,7 +248,9 @@ def read_squad_examples(input_file, tokenizer, is_training):
 
   examples = []
   for entry in input_data:
+    title_label = entry["title_label"]+2
     for paragraph in entry["paragraphs"]:
+      # title_label = paragraph["title_label"]+2
       paragraph_text = paragraph["context"]
       #doc_tokens = []
       #read_squad_examples_chinese
@@ -320,6 +318,7 @@ def read_squad_examples(input_file, tokenizer, is_training):
             orig_answer_text = ""
 
         example = SquadExample(
+            title_label=title_label,
             qas_id=qas_id,
             question_text=question_text,
             doc_tokens=doc_tokens,
@@ -371,6 +370,7 @@ def convert_examples_to_features(examples, tokenizer, max_seq_length,
           example.orig_answer_text)
 
     # The -3 accounts for [CLS], [SEP] and [SEP]
+    # -1 for label_title
     max_tokens_for_doc = max_seq_length - len(query_tokens) - 3
 
     # We can have documents that are longer than the maximum sequence length.
@@ -394,13 +394,18 @@ def convert_examples_to_features(examples, tokenizer, max_seq_length,
       token_to_orig_map = {}
       token_is_max_context = {}
       segment_ids = []
+      title_ids = []
       tokens.append("[CLS]")
       segment_ids.append(0)
+      title_ids.append(0)
       for token in query_tokens:
         tokens.append(token)
         segment_ids.append(0)
+        title_ids.append(0)
       tokens.append("[SEP]")
       segment_ids.append(0)
+      title_ids.append(0)
+      # title_ids.append(example.title_label)
 
       for i in range(doc_span.length):
         split_token_index = doc_span.start + i
@@ -411,8 +416,12 @@ def convert_examples_to_features(examples, tokenizer, max_seq_length,
         token_is_max_context[len(tokens)] = is_max_context
         tokens.append(all_doc_tokens[split_token_index])
         segment_ids.append(1)
+        title_ids.append(example.title_label)
+        # title_ids.append(0)
       tokens.append("[SEP]")
       segment_ids.append(1)
+      title_ids.append(example.title_label)
+      # title_ids.append(0)
 
       input_ids = tokenizer.convert_tokens_to_ids(tokens)
 
@@ -425,10 +434,12 @@ def convert_examples_to_features(examples, tokenizer, max_seq_length,
         input_ids.append(0)
         input_mask.append(0)
         segment_ids.append(0)
+        title_ids.append(0)
 
       assert len(input_ids) == max_seq_length
       assert len(input_mask) == max_seq_length
       assert len(segment_ids) == max_seq_length
+      assert len(title_ids) == max_seq_length
 
       start_position = None
       end_position = None
@@ -470,6 +481,7 @@ def convert_examples_to_features(examples, tokenizer, max_seq_length,
             "input_mask: %s" % " ".join([str(x) for x in input_mask]))
         tf.logging.info(
             "segment_ids: %s" % " ".join([str(x) for x in segment_ids]))
+        tf.logging.info("title_ids: %s" % " ".join([str(x) for x in title_ids]))
         if is_training and example.is_impossible:
           tf.logging.info("impossible example")
         if is_training and not example.is_impossible:
@@ -489,6 +501,7 @@ def convert_examples_to_features(examples, tokenizer, max_seq_length,
           input_ids=input_ids,
           input_mask=input_mask,
           segment_ids=segment_ids,
+          title_ids=title_ids,
           start_position=start_position,
           end_position=end_position,
           is_impossible=example.is_impossible)
@@ -573,7 +586,7 @@ def _check_is_max_context(doc_spans, cur_span_index, position):
   return cur_span_index == best_span_index
 
 
-def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
+def create_model(bert_config, is_training, input_ids, input_mask, segment_ids, title_ids,
                  use_one_hot_embeddings):
   """Creates a classification model."""
   model = modeling.BertModel(
@@ -629,6 +642,7 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
     input_ids = features["input_ids"]
     input_mask = features["input_mask"]
     segment_ids = features["segment_ids"]
+    title_ids = features["title_ids"]
 
     is_training = (mode == tf.estimator.ModeKeys.TRAIN)
 
@@ -638,6 +652,7 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
         input_ids=input_ids,
         input_mask=input_mask,
         segment_ids=segment_ids,
+        title_ids=title_ids,
         use_one_hot_embeddings=use_one_hot_embeddings)
 
     tvars = tf.trainable_variables()
@@ -718,6 +733,7 @@ def input_fn_builder(input_file, seq_length, is_training, drop_remainder):
       "input_ids": tf.FixedLenFeature([seq_length], tf.int64),
       "input_mask": tf.FixedLenFeature([seq_length], tf.int64),
       "segment_ids": tf.FixedLenFeature([seq_length], tf.int64),
+      "title_ids": tf.FixedLenFeature([seq_length], tf.int64)
   }
 
   if is_training:
@@ -1104,6 +1120,7 @@ class FeatureWriter(object):
     features["input_ids"] = create_int_feature(feature.input_ids)
     features["input_mask"] = create_int_feature(feature.input_mask)
     features["segment_ids"] = create_int_feature(feature.segment_ids)
+    features["title_ids"] = create_int_feature(feature.title_ids)
 
     if self.is_training:
       features["start_positions"] = create_int_feature([feature.start_position])

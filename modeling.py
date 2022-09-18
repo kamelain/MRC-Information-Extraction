@@ -134,6 +134,7 @@ class BertModel(object):
                input_ids,
                input_mask=None,
                token_type_ids=None,
+               title_type_ids=None,
                use_one_hot_embeddings=False,
                scope=None):
     """Constructor for BertModel.
@@ -168,6 +169,9 @@ class BertModel(object):
     if token_type_ids is None:
       token_type_ids = tf.zeros(shape=[batch_size, seq_length], dtype=tf.int32)
 
+    if title_type_ids is None:
+      title_type_ids = tf.zeros(shape=[batch_size, seq_length], dtype=tf.int32)
+
     with tf.variable_scope(scope, default_name="bert"):
       with tf.variable_scope("embeddings"):
         # Perform embedding lookup on the word ids.
@@ -191,6 +195,9 @@ class BertModel(object):
             position_embedding_name="position_embeddings",
             initializer_range=config.initializer_range,
             max_position_embeddings=config.max_position_embeddings,
+            title_type_ids=title_type_ids,
+            title_type_ids_embedding_vocab_size=2,
+            title_type_ids_embedding_name='title_type_ids_embedding',
             dropout_prob=config.hidden_dropout_prob)
 
       with tf.variable_scope("encoder"):
@@ -428,12 +435,16 @@ def embedding_lookup(input_ids,
 def embedding_postprocessor(input_tensor,
                             use_token_type=False,
                             token_type_ids=None,
+                            use_title_type=False,
+                            title_type_ids=None,
                             token_type_vocab_size=16,
                             token_type_embedding_name="token_type_embeddings",
                             use_position_embeddings=True,
                             position_embedding_name="position_embeddings",
                             initializer_range=0.02,
                             max_position_embeddings=512,
+                            title_type_ids_embedding_vocab_size=2,
+                            title_type_ids_embedding_name='title_type_ids_embedding',
                             dropout_prob=0.1):
   """Performs various post-processing on a word embedding tensor.
 
@@ -485,6 +496,22 @@ def embedding_postprocessor(input_tensor,
     token_type_embeddings = tf.reshape(token_type_embeddings,
                                        [batch_size, seq_length, width])
     output += token_type_embeddings
+
+  if use_title_type:
+    if title_type_ids is None:
+      raise ValueError("`title_type_ids` must be specified if"
+                       "`use_title_type` is True.")
+    title_type_table = tf.get_variable(
+        name=title_type_ids_embedding_name,
+        shape=[title_type_ids_embedding_vocab_size, width],
+        initializer=create_initializer(initializer_range))
+
+    flat_title_type_ids = tf.reshape(title_type_ids, [-1])
+    one_hot_ids = tf.one_hot(flat_title_type_ids, depth=title_type_ids_embedding_vocab_size)
+    title_type_embeddings = tf.matmul(one_hot_ids, title_type_table)
+    title_type_embeddings = tf.reshape(title_type_embeddings,
+                                       [batch_size, seq_length, width])
+    output += title_type_embeddings
 
   if use_position_embeddings:
     assert_op = tf.assert_less_equal(seq_length, max_position_embeddings)

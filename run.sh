@@ -1,5 +1,5 @@
 CUDA_VISIBLE_DEVICES=1 python run_drcd.py \
-  --do_train=True \
+  --do_train=False \
   --do_predict=True \
   --train_batch_size=6 \
   --learning_rate=3e-5 \
