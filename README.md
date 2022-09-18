@@ -1,7 +1,7 @@
 # MRC-Information-Extraction
 A Study on Contextualized Language Modeling for Machine Reading Comprehension 
 
-基於[BERT](https://github.com/google-research/bert)、[BERT-wwm](https://github.com/ymcui/Chinese-BERT-wwm) 以及 [MacBERT](https://github.com/ymcui/MacBERT) 的官方資源修改。
+基於 [BERT](https://github.com/google-research/bert)、[BERT-wwm](https://github.com/ymcui/Chinese-BERT-wwm) 以及 [MacBERT](https://github.com/ymcui/MacBERT) 的官方資源修改。
 
 適用於中文機器閱讀理解：繁體中文 [DRCD](https://github.com/DRCSolutionService/DRCD)、簡體中文 [CMRC](https://github.com/ymcui/cmrc2018)。
 
