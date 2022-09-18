@@ -14,7 +14,7 @@ A Study on Contextualized Language Modeling for Machine Reading Comprehension
 ### Conda 環境設定檔
 
 >* tf.yml 模型訓練環境
->* prep.yml 資料預處理環境，包括 Clustering, Ensemble
+>* prep.yml 資料預處理環境（Clustering、Ensemble）
 
 
 ### 使用
@@ -37,19 +37,19 @@ bash run.sh
 bash eval.sh
 ```
 
-### Fine-tuning DRCD 結果輸出位置
+### Fine-tuning DRCD 
 
 >* output
 >* output_wwm
 >* output_mac
 
-### Fine-tuning CMRC 結果輸出位置
+### Fine-tuning CMRC
 
 >* output
 >* output_c_wwm
 >* output_c_mac
 
-### Information Extraction 程式碼位置
+### Information Extraction 
 
 >* cls
 
