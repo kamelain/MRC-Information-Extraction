@@ -4,17 +4,16 @@
 
 適用於中文機器閱讀理解：繁體中文 [DRCD](https://github.com/DRCSolutionService/DRCD)、簡體中文 [CMRC](https://github.com/ymcui/cmrc2018)。
 
-Inspired by [BERT-for-Chinese-Question-Answering](https://github.com/eva-n27/BERT-for-Chinese-Question-Answering), [BERT with History Answer Embedding for Conversational Question Answering](https://github.com/prdwb/bert_hae)。
-
 本程式碼為論文 [A Study on Contextualized Language Modeling for Machine Reading Comprehension](https://aclanthology.org/2021.rocling-1.7/) 以及 [A Study on the Information Extraction and Knowledge Injection for Machine Reading Comprehension](https://etds.lib.ntnu.edu.tw/thesis/detail/c7f11bb51318d02b9874ae5429b6eb82/?seq=1) 於單輪機器閱讀理解的實作部分。包括 Fine-tune 於 BERT/BERT-wwm/MacBERT 結果、加入 Information Extration 資訊結果，以及 N-best 答案進行 Reranking 的 Ensemble 方法與結果。
 
+Clutering Strategies 如下。
 ![Clustering Strategies](https://github.com/kamelain/MRC-Information-Extraction/blob/main/Screen%20Shot%202022-09-18%20at%208.31.49%20PM.png)
 
 
 ### Conda 環境設定檔
 
->*tf.yml 模型訓練環境
->*prep.yml 資料預處理 (Clustering, Ensemble) 等環境
+>* tf.yml 模型訓練環境
+>* prep.yml 資料預處理環境，包括 Clustering, Ensemble
 
 
 ### 使用
